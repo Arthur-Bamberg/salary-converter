@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserDTO } from './user.dto';
 import { PrismaService } from '../../database/PrismaService';
 
@@ -14,7 +14,7 @@ export class UserService {
     });
 
     if (userExists) {
-      throw new Error('User already exists');
+      throw new HttpException('User already exists', HttpStatus.CONFLICT);
     }
 
     const user = await this.prisma.user.create({ data });
@@ -23,8 +23,6 @@ export class UserService {
   }
 
   async update(idUser: number, data: UserDTO) {
-    idUser = Number(idUser);
-
     const userExists = await this.prisma.user.findUnique({
       where: {
         idUser,
@@ -32,7 +30,7 @@ export class UserService {
     });
 
     if (!userExists) {
-      throw new Error('User not found');
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     const user = await this.prisma.user.update({
@@ -46,8 +44,6 @@ export class UserService {
   }
 
   async delete(idUser: number) {
-    idUser = Number(idUser);
-
     const userExists = await this.prisma.user.findUnique({
       where: {
         idUser,
@@ -55,7 +51,7 @@ export class UserService {
     });
 
     if (!userExists) {
-      throw new Error('User not found');
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     const user = await this.prisma.user.delete({
